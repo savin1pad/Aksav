@@ -69,6 +69,7 @@ class StorageRepository with LogMixin {
     return downloadUrl;
   }
 
+  // ignore: body_might_complete_normally_nullable
   Future<String?> entireUploadMediaFlowAndUpdatingUserDetails(
       {XFile? xFile,
       String? userID,

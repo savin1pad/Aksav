@@ -256,8 +256,8 @@ class _OnboardingMobileState extends State<_OnboardingMobile>
                       child: ElevatedButton(
                         style: ButtonStyle(
                           backgroundColor:
-                              MaterialStateProperty.all(Colors.orange),
-                          shape: MaterialStateProperty.all(
+                              WidgetStateProperty.all(Colors.orange),
+                          shape: WidgetStateProperty.all(
                             RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15.0),
                             ),
