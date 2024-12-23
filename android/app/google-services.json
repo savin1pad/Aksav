@@ -8,6 +8,42 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:490438852604:android:4094d6d68da3c716e5bc79",
+        "android_client_info": {
+          "package_name": "com.aksav.journey"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "490438852604-b33k8r5heh1m9qtuchslhf1dfn4i53q1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQeWJnestvLmjU2U6RqFTGG76dNfyEcZ4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "490438852604-b33k8r5heh1m9qtuchslhf1dfn4i53q1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "490438852604-c8j45b64nlkpjc6dmlujdg3d7r133l4u.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.story"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:490438852604:android:fd5391c3903a7c19e5bc79",
         "android_client_info": {
           "package_name": "com.example.journey"

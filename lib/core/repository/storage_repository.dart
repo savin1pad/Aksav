@@ -59,13 +59,24 @@ class StorageRepository with LogMixin {
   }
 
   Future<String?> uploadMedia({File? file, String? userID}) async {
-    final ref = storageRefUserProfile
-        .child('UserProfile_Images')
-        .child('ProfilePic_$userID}');
+    final ref =
+        storageRefUserProfile.child('GoalsImages').child('GoalPic_$userID}');
     final TaskSnapshot task = await ref.putFile(file!);
     warningLog('${task.storage}');
     final String downloadUrl = await ref.getDownloadURL();
     warningLog(downloadUrl);
+    return downloadUrl;
+  }
+
+  Future<String?> uploadLogMedia(
+      {File? file, String? userID, String? goalId}) async {
+    final ref = storageRefUserProfile
+        .child('GoalsLogImages')
+        .child('GoalPic_${userID}_$goalId}');
+    final TaskSnapshot task = await ref.putFile(file!);
+    warningLog('${task.storage}');
+    final String downloadUrl = await ref.getDownloadURL();
+    warningLog('checking for the url lof$downloadUrl');
     return downloadUrl;
   }
 
@@ -82,11 +93,12 @@ class StorageRepository with LogMixin {
       try {
         warningLog('if the file is not there $userNameL');
         await app<AuthRepository>().patchUserNameAndPhotoUrl(
-            userName: userNameL,
-            photoUrl: '',
-            emailId: email,
-            userId: userID,
-            documentID: documentId);
+          userName: userNameL,
+          photoUrl: '',
+          emailId: email,
+          userId: userID,
+          documentID: documentId,
+        );
       } catch (e) {
         errorLog(e.toString());
         throw ErrorUploadingImageAndPatchingData(

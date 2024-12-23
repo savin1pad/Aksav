@@ -205,7 +205,13 @@ class _VerifyCodeMobileState extends State<_VerifyCodeMobile>
                           ),
                         )
                       : app<NavigatorService>().buildAndPush(
-                          HomeView(),
+                          HomeView(
+                            email: '${state.email}',
+                            userId: state.userId!,
+                            documentId:
+                                RepositoryProvider.of<AuthRepository>(context)
+                                    .documentId,
+                          ),
                         );
                 },
                 child: Container(

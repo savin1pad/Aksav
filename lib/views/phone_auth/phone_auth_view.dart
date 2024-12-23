@@ -1,6 +1,7 @@
 library phone_auth_view;
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:journey/core/logger.dart';
 import 'package:journey/core/services/navigator_service.dart';

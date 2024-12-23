@@ -15,61 +15,42 @@ class _PhoneAuthMobileState extends State<_PhoneAuthMobile>
   late AnimationController _animationController;
   late AnimationController _textFieldsController;
   late Animation<Offset> _slideAnimation;
-  Animation<Size>? _heightAnimation;
-  Animation<Color?>? colorAnimation;
+  Animation<double>? _fadeAnimation;
   String? phoneNumber, password;
   bool hasShownSignUpDialog = false;
   bool hasShownSnackbar = false;
+
   @override
   void initState() {
+    super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(seconds: 4),
     );
     _textFieldsController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(seconds: 4),
     );
-    _slideAnimation =
-        Tween<Offset>(begin: const Offset(-1.5, 0), end: const Offset(0, 0))
-            .animate(
-      CurvedAnimation(
-          parent: _textFieldsController, curve: Curves.linearToEaseOut),
-    )..addListener(() {
-            setState(() {});
-          });
-    _heightAnimation = Tween<Size>(
-      begin: const Size(100, 100),
-      end: const Size(350, 250),
-    ).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.fastOutSlowIn)
-        ..addListener(() {
-          setState(() {});
-        }),
-    );
-    colorAnimation = ColorTween(begin: Colors.grey, end: Colors.white)
-        .animate(_animationController)
-      ..addListener(() {
-        setState(() {});
-      });
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.5), // Start from below the screen
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _textFieldsController,
+      curve: Curves.decelerate,
+    ));
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0, // Start fully transparent
+      end: 1.0, // End fully opaque
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.decelerate,
+    ));
+
+    // Start animations
     _animationController.forward();
-    _heightAnimation?.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        _animationController.stop();
-        _textFieldsController.forward();
-      }
-    });
-    colorAnimation?.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        _animationController.stop();
-      }
-    });
-    _slideAnimation.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        _textFieldsController.stop();
-      }
-    });
-    super.initState();
+    _textFieldsController.forward();
   }
 
   @override
@@ -135,108 +116,109 @@ class _PhoneAuthMobileState extends State<_PhoneAuthMobile>
           body: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment.topCenter,
+                begin: Alignment.topLeft,
                 end: Alignment.bottomCenter,
-                colors: [ConstantVars.maintheme, ConstantVars.maintheme],
+                stops: const [0.4, 0.6],
+                colors: [
+                  ConstantVars.maintheme,
+                  Colors.white,
+                ],
               ),
             ),
-            child: Center(
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                curve: Curves.easeIn,
-                height:
-                    state is AuthLoading ? 300 : _heightAnimation?.value.height,
-                width:
-                    state is AuthLoading ? 300 : _heightAnimation?.value.width,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15.0),
-                  color: state is AuthLoading
-                      ? Colors.white54
-                      : ConstantVars.cardColorTheme,
-                ),
-                child: Form(
-                  key: _signUpFormKey,
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    child: Column(
-                      children: [
-                        const SizedBox(
-                          height: 20,
+            child: FadeTransition(
+              opacity: _fadeAnimation!,
+              child: Center(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      SizedBox(height: 10),
+                      SlideTransition(
+                        position: _slideAnimation,
+                        child: Image.asset(
+                          'assets/icon.jpeg',
+                          height: 150,
+                          width: 150,
                         ),
-                        customText2('Sign Up'),
-                        const SizedBox(
-                          height: 20,
+                      ),
+                      SizedBox(height: 10),
+                      SlideTransition(
+                        position: _slideAnimation,
+                        child: Text(
+                          'Welcome to Aksa',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 15.0, vertical: 8.0),
-                          child: SlideTransition(
-                            position: _slideAnimation,
-                            child: IntlPhoneField(
-                              decoration: const InputDecoration(
-                                labelText: 'Phone Number',
-                                filled: true,
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(
-                                  borderSide: BorderSide(),
-                                ),
+                      ),
+                      SizedBox(height: 100),
+                      SlideTransition(
+                        position: _slideAnimation,
+                        child: AnimatedContainer(
+                          duration: const Duration(seconds: 1),
+                          curve: Curves.easeIn,
+                          width: 350,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15.0),
+                            color: state is AuthLoading
+                                ? Colors.white54
+                                : ConstantVars.cardColorTheme,
+                          ),
+                          child: Form(
+                            key: _signUpFormKey,
+                            child: Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Column(
+                                children: [
+                                  const SizedBox(
+                                    height: 20,
+                                  ),
+                                  customText2('Sign Up'),
+                                  const SizedBox(
+                                    height: 20,
+                                  ),
+                                  IntlPhoneField(
+                                    decoration: const InputDecoration(
+                                      labelText: 'Phone Number',
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                      border: OutlineInputBorder(
+                                        borderSide: BorderSide(),
+                                      ),
+                                    ),
+                                    initialCountryCode: 'IN',
+                                    onChanged: (phone) {
+                                      log(phone.completeNumber);
+                                      phoneNumber = phone.completeNumber;
+                                    },
+                                  ),
+                                  const SizedBox(
+                                    height: 30,
+                                  ),
+                                  GestureDetector(
+                                    onTap: submit,
+                                    child: CustomContainer(
+                                      title: state is AuthLoading
+                                          ? 'Sending Code'
+                                          : 'Send Code',
+                                      icon: Icons.phone,
+                                      height: 50,
+                                      width: 140,
+                                      showShadow: false,
+                                      textSize: 20,
+                                      color: Colors.green,
+                                      textColor: Colors.white,
+                                    ),
+                                  ),
+                                  SizedBox(height: 20),
+                                ],
                               ),
-                              initialCountryCode: 'IN',
-                              onChanged: (phone) {
-                                log(phone.completeNumber);
-                                phoneNumber = phone.completeNumber;
-                              },
                             ),
-                            // child: TextFormField(
-                            //   autocorrect: false,
-                            //   keyboardType: TextInputType.phone,
-                            //   maxLength: 10,
-                            //   decoration: InputDecoration(
-                            //     border: OutlineInputBorder(
-                            //       borderRadius: BorderRadius.circular(15.0),
-                            //     ),
-                            //     filled: true,
-                            //     labelText: 'Phone Number',
-                            //     prefixIcon: const Icon(
-                            //       Icons.email,
-                            //       color: Colors.black,
-                            //     ),
-                            //   ),
-                            //   validator: (String? value) {
-                            //     if (value == null || value.trim().isEmpty) {
-                            //       return 'Must Contain a PhoneNumber';
-                            //     }
-                            //     if (value.length < 10 || value.length > 10) {
-                            //       return 'Length of phone number invalid';
-                            //     }
-                            //     return null;
-                            //   },
-                            //   onSaved: (String? value) {
-                            //     phoneNumber = '+91value';
-                            //   },
-                            // ),
                           ),
                         ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        GestureDetector(
-                          onTap: submit,
-                          child: CustomContainer(
-                            title: state is AuthLoading
-                                ? 'Sending Code'
-                                : 'Send Code',
-                            icon: Icons.phone,
-                            height: 50,
-                            width: 140,
-                            showShadow: false,
-                            textSize: 20,
-                            color: Colors.green,
-                            textColor: Colors.white,
-                          ),
-                        )
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),

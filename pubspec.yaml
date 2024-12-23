@@ -1,6 +1,6 @@
 name: journey
 description: A new Flutter project.
-publish_to: none
+# publish_to: none
 version: 1.0.0+1
 environment:
   sdk: ">=2.17.6 <3.0.0"
@@ -14,17 +14,27 @@ dependencies:
     sdk: flutter
   flutter_bloc: ^8.1.1
   font_awesome_flutter: ^10.2.1
+  fl_chart: ^0.69.0
+  curved_navigation_bar: ^1.0.6
+  shared_preferences: ^2.3.2
   image: ^4.0.15
+  flutter_login: ^5.0.0
+  wave: ^0.2.2
+  flutter_otp_text_field: ^1.2.0
+  cached_network_image: ^3.3.1
   get_it: ^7.2.0
   http: ^1.1.0
   google_fonts: ^5.1.0
   hydrated_bloc: ^9.1.0
   image_picker: ^0.8.5+3
   intl_phone_field: ^3.1.0
+  audioplayers: ^6.1.0
+  sqflite: ^2.3.3+1
   logger: ^1.1.0
   path_provider: ^2.0.11
   provider: ^6.0.3
   responsive_builder: ^0.5.1
+  card_swiper: ^3.0.1
   swipe_cards: ^2.0.0+1
   swipeable_card_stack: ^0.0.5
   google_sign_in: ^6.1.5
@@ -33,17 +43,19 @@ dependencies:
   animated_text_kit: ^4.2.2
   firebase_storage: ^11.0.11
   step_progress_indicator: ^1.0.2
+  glassmorphism_ui: ^0.3.0
   lottie: ^2.6.0
+  flutter_card_swiper: ^7.0.1
+  chat_bubbles: ^1.5.0
+  intl: ^0.19.0
 dev_dependencies:
   flutter_lints: ^2.0.0
   flutter_test:
     sdk: flutter
 flutter:
   uses-material-design: true
-
-# To add assets to your application, add an assets section, like this:
-assets:
-#  - images/a_dot_burr.jpeg
+  assets:
+    - assets/
 #  - images/a_dot_ham.jpeg
 # An image asset can refer to one or more resolution-specific "variants", see
 # https://flutter.dev/assets-and-images/#resolution-aware.
@@ -54,24 +66,24 @@ assets:
 # "family" key with the font family name, and a "fonts" key with a
 # list giving the asset and other descriptors for the font. For
 # example:
- fonts:
-   - family: Ultra
-     fonts:
+  fonts:
+    - family: Ultra
+      fonts:
        - asset: assets/Ultra-Regular.ttf
          weight: 500
       
-   - family: BubblegumSans
-     fonts:
+    - family: BubblegumSans
+      fonts:
        - asset: assets/BubblegumSans-Regular.ttf
          weight: 700
 
-   - family: IndieFlower
-     fonts:
+    - family: IndieFlower
+      fonts:
        - asset: assets/IndieFlower-Regular.ttf
          weight: 700  
 
-   - family: ArchitectsDaughter
-     fonts:
+    - family: ArchitectsDaughter
+      fonts:
        - asset: assets/ArchitectsDaughter-Regular.ttf
          weight: 700      
             

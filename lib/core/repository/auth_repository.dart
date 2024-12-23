@@ -117,6 +117,8 @@ class AuthRepository with LogMixin {
       _userId = responseData['localId'];
       _refreshToken = responseData['refreshToken'];
       _email = responseData['email'];
+      errorLog(
+          'user id $_userId and email $email and refreshtoken length ${_refreshToken?.length} and token length ${_token?.length}');
       final String documentId = await createUserDetailsInDb(
         token: _token!,
         userId: _userId!,
@@ -165,6 +167,7 @@ class AuthRepository with LogMixin {
     final url = Uri.parse(
         'https://story-c0de2-default-rtdb.asia-southeast1.firebasedatabase.app/userDetails.json');
     try {
+      final docId = const Uuid().v4();
       final response = await http.post(
         url,
         body: json.encode({
@@ -172,7 +175,7 @@ class AuthRepository with LogMixin {
           'userId': userId,
           'token': token,
           'refreshToken': refreshToken,
-          'documentId': documentId,
+          'documentId': docId,
           'uniqueUserId': const Uuid().v4(),
           'silentLogin': true,
           'phoneNumber': phoneNumber,
@@ -193,7 +196,7 @@ class AuthRepository with LogMixin {
     }
   }
 
-  Future<String?> logInWithUserCredential(
+  Future<UserModel?> logInWithUserCredential(
       {required String email, required String password}) async {
     var url = Uri.parse(
         'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyAQeWJnestvLmjU2U6RqFTGG76dNfyEcZ4');
@@ -217,7 +220,8 @@ class AuthRepository with LogMixin {
       _userId = responseData['localId'];
       _refreshToken = responseData['refreshToken'];
       _email = responseData['email'];
-      return _userId;
+      final UserModel? user = await fetchUserDetailsE(email);
+      return user;
     } catch (e) {
       // throw LogInFailure(message: e.toString(), email: email);
       _showErrorDialog = true;
@@ -226,7 +230,7 @@ class AuthRepository with LogMixin {
     }
   }
 
-  Future<String?> fetchUserDetailsE(String email) async {
+  Future<UserModel?> fetchUserDetailsE(String email) async {
     var url = Uri.parse(
         'https://story-c0de2-default-rtdb.asia-southeast1.firebasedatabase.app/userDetails.json?orderBy="email"&equalTo="${email}"');
     try {
@@ -244,10 +248,21 @@ class AuthRepository with LogMixin {
         _email = value['email'];
         _refreshToken = value['refreshToken'];
       });
+      UserModel userModel = UserModel(
+        email: _email,
+        username: '',
+        userId: _userId,
+        documentId: _documentId,
+        uniqueUserId: '',
+        token: _token,
+        refreshToken: _refreshToken,
+        photoUrl: '',
+        password: '',
+      );
       dev.log(
           'token of the user:$_token,document id of the user$_documentId, email of the user $_email, userId of the user $userId',
           name: 'Fetching User Details');
-      return _token;
+      return userModel;
     } catch (e) {
       rethrow;
     }
@@ -261,9 +276,9 @@ class AuthRepository with LogMixin {
     String accessToken = 'OowDsZiGveBo9HVPlBMI7';
     var passCode = randome.nextInt(900000) + 100000;
     try {
-      String? idToken = await fetchUserDetailsE(email);
+      UserModel? idToken = await fetchUserDetailsE(email);
       dev.log('$idToken', name: 'NewForgotPasswordMethod');
-      if (idToken!.isEmpty) {
+      if (idToken!.token!.isEmpty) {
         dev.log('User Does Not exist', name: 'NewForgotPasswordMethod');
         throw const ForgotPasswordErrorState(
           message: 'Email does not exist',
@@ -321,6 +336,31 @@ class AuthRepository with LogMixin {
           {
             "userName": userName,
             "photoUrl": photoUrl,
+          },
+        ),
+      );
+      warningLog(response.body);
+      final responseData = json.decode(response.body) as Map;
+      debugLog('$responseData');
+    } catch (e) {
+      throw ErrorPatchingUserName(
+        message: e.toString(),
+      );
+    }
+  }
+
+  patchUserDetails({required UserModel user}) async {
+    var url = Uri.parse(
+        'https://story-c0de2-default-rtdb.asia-southeast1.firebasedatabase.app/userDetails/${user.documentId}.json');
+    warningLog('$user');
+    try {
+      final response = await http.patch(
+        url,
+        body: json.encode(
+          {
+            "whatDoYouWant": user.whatDoYouWant,
+            "whatIsYourName": user.whatIsYourName,
+            "howFarWillYouGo": user.howFarWillYouGo
           },
         ),
       );

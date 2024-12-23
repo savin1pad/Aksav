@@ -117,7 +117,13 @@ class _OnboardingMobileState extends State<_OnboardingMobile>
 
         if (state is AuthSuccess) {
           if (state.onBoardingCompleted == true) {
-            app<NavigatorService>().buildAndPush(HomeView());
+            app<NavigatorService>().buildAndPush(
+              HomeView(
+                email: widget.email,
+                userId: widget.userId,
+                documentId: widget.documentId,
+              ),
+            );
           }
         }
         if (state is ErrorFetchingUserData) {

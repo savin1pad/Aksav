@@ -1,6 +1,9 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:io';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+
 import 'package:journey/core/logger.dart';
 
 import 'package:journey/core/repository/storage_repository.dart';
@@ -14,5 +17,15 @@ class DataBloc extends Bloc<DataEvent, DataState> with LogMixin {
     required this.storageRepository,
   }) : super(DataInitial()) {
     on<DataEvent>((event, emit) {});
+    on<GoalUploadImageEvent>((event, emit) async {
+      emit(GoalUploadImageLoadingState());
+      try {
+        final String? imageUrl = await storageRepository.uploadMedia(
+            file: event.xFile, userID: event.userID);
+        emit(GoalUploadImageSuccessState(imageUrl: imageUrl!));
+      } catch (e) {
+        emit(GoalUploadImageErrorState(message: e.toString()));
+      }
+    });
   }
 }

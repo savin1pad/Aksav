@@ -1,5 +1,8 @@
 import 'package:get_it/get_it.dart';
 import 'package:journey/core/repository/auth_repository.dart';
+import 'package:journey/core/repository/chat_repository.dart';
+import 'package:journey/core/repository/goal_log_repository.dart';
+import 'package:journey/core/repository/goal_repository.dart';
 import 'package:journey/core/repository/storage_repository.dart';
 import 'package:journey/core/services/httpservice.dart';
 import 'dart:developer' as dev;
@@ -20,5 +23,14 @@ void initializeGetIt() {
   );
   app.registerLazySingleton(
     () => StorageRepository(),
+  );
+  app.registerLazySingleton(
+    () => GoalRepository(),
+  );
+  app.registerLazySingleton(
+    () => ChatRepository(),
+  );
+  app.registerLazySingleton(
+    () => GoalLogRepository(),
   );
 }

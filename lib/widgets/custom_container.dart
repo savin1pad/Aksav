@@ -1,5 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
+import 'package:journey/global/constants.dart';
 
 class CustomContainer extends StatefulWidget {
   final String title;
@@ -36,12 +37,12 @@ class _CustomContainerState extends State<CustomContainer> {
         color: widget.color,
         borderRadius: BorderRadius.circular(10.0),
         border: Border.all(color: Colors.grey),
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           colors: [
-            Color(0xffF6F0C4),
-            Colors.deepOrange,
+            const Color(0xffF6F0C4),
+            ConstantVars.maintheme,
           ],
-          stops: [0, 0],
+          stops: const [0, 0],
           begin: FractionalOffset.bottomRight,
           end: FractionalOffset.topLeft,
         ),
@@ -72,7 +73,6 @@ class _CustomContainerState extends State<CustomContainer> {
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w500,
-
                 // height: widget.textSize,
               ),
             ),

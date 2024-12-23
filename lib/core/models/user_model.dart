@@ -5,14 +5,18 @@ import 'dart:core';
 import 'package:equatable/equatable.dart';
 
 class UserModel extends Equatable {
-  final String? email;
-  final String? username;
-  final String? userId;
-  final String? documentId;
+  String? email;
+  String? username;
+  String? userId;
+  String? documentId;
   final String? uniqueUserId;
   final String? token;
   final String? refreshToken;
-  final String? photoUrl;
+  String? whatDoYouWant;
+  String? howMuchDoYouWant;
+  String? howFarWillYouGo;
+  String? whatIsYourName;
+  String? photoUrl;
   final String? phoneNumber;
   final String? password;
   bool? showOnBoarding = false;
@@ -24,6 +28,10 @@ class UserModel extends Equatable {
     this.uniqueUserId,
     this.token,
     this.refreshToken,
+    this.whatDoYouWant,
+    this.howMuchDoYouWant,
+    this.howFarWillYouGo,
+    this.whatIsYourName,
     this.photoUrl,
     this.phoneNumber,
     this.password,
@@ -38,6 +46,10 @@ class UserModel extends Equatable {
     String? uniqueUserId,
     String? token,
     String? refreshToken,
+    String? whatDoYouWant,
+    String? howMuchDoYouWant,
+    String? howFarWillYouGo,
+    String? whatIsYourName,
     String? photoUrl,
     String? phoneNumber,
     String? password,
@@ -51,6 +63,10 @@ class UserModel extends Equatable {
       uniqueUserId: uniqueUserId ?? this.uniqueUserId,
       token: token ?? this.token,
       refreshToken: refreshToken ?? this.refreshToken,
+      whatDoYouWant: whatDoYouWant ?? this.whatDoYouWant,
+      howMuchDoYouWant: howMuchDoYouWant ?? this.howMuchDoYouWant,
+      howFarWillYouGo: howFarWillYouGo ?? this.howFarWillYouGo,
+      whatIsYourName: whatIsYourName ?? this.whatIsYourName,
       photoUrl: photoUrl ?? this.photoUrl,
       phoneNumber: phoneNumber ?? this.phoneNumber,
       password: password ?? this.password,
@@ -71,6 +87,10 @@ class UserModel extends Equatable {
       'phoneNumber': phoneNumber,
       'password': password,
       'showOnBoarding': showOnBoarding,
+      'whatDoYouWant': whatDoYouWant,
+      'howMuchDoYouWant': howMuchDoYouWant,
+      'howFarWillYouGo': howFarWillYouGo,
+      'whatIsYourName': whatIsYourName,
     };
   }
 
@@ -92,6 +112,17 @@ class UserModel extends Equatable {
       password: map['password'] != null ? map['password'] as String : null,
       showOnBoarding:
           map['showOnBoarding'] != null ? map['showOnBoarding'] as bool : null,
+      howFarWillYouGo: map['howFarWillYouGo'] != null
+          ? map['howFarWillYouGo'] as String
+          : null,
+      howMuchDoYouWant: map['howMuchDoYouWant'] != null
+          ? map['howMuchDoYouWant'] as String
+          : null,
+      whatDoYouWant:
+          map['whatDoYouWant'] != null ? map['whatDoYouWant'] as String : null,
+      whatIsYourName: map['whatIsYourName'] != null
+          ? map['whatIsYourName'] as String
+          : null,
     );
   }
 
@@ -113,6 +144,10 @@ class UserModel extends Equatable {
       uniqueUserId,
       token,
       refreshToken,
+      whatDoYouWant,
+      howMuchDoYouWant,
+      howFarWillYouGo,
+      whatIsYourName,
       photoUrl,
       phoneNumber,
       password,

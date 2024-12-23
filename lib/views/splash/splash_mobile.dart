@@ -28,7 +28,11 @@ class _SplashMobileState extends State<_SplashMobile> with LogMixin {
         warningLog('$state');
         if (state is AuthSuccess) {
           app<NavigatorService>().buildAndPush(
-            HomeView(),
+            HomeView(
+              email: state.email!,
+              userId: state.userId!,
+              documentId: state.documentID!,
+            ),
           );
         } else if (state is SignUpFailure) {
           app<NavigatorService>().buildAndPush(

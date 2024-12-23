@@ -506,6 +506,29 @@ class ErrorUploadingImageAndPatchingData extends AuthState {
   List<Object> get props => [message];
 }
 
+class FetchUserLoadingState extends AuthState {}
+
+class FetchUserSuccessState extends AuthState {
+  final UserModel userData;
+
+  const FetchUserSuccessState({
+    required this.userData,
+  });
+
+  @override
+  List<Object> get props => [userData];
+}
+
+class FetchUserErrorState extends AuthState {
+  final String message;
+  const FetchUserErrorState({
+    required this.message,
+  });
+
+  @override
+  List<Object> get props => [message];
+}
+
 class LogInFailure extends AuthState {
   final String message;
   final String email;

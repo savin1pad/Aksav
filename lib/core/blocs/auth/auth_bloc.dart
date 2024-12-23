@@ -10,6 +10,7 @@ import 'package:journey/core/logger.dart';
 import 'package:journey/core/models/user_model.dart';
 import 'package:journey/core/repository/auth_repository.dart';
 import 'package:journey/core/repository/storage_repository.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -24,7 +25,27 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> with LogMixin, HydratedMixin {
     required this.authRepository,
     required this.storageRepository,
   }) : super(const AuthState()) {
+    errorLog('checking for initial state $state');
     on<AuthEvent>((event, emit) {});
+
+    on<FetchUserDetailsFromServer>((event, emit) async {
+      emit(FetchUserLoadingState());
+      try {
+        final UserModel user =
+            await authRepository.fetchUserDetails(userId: event.userId);
+        emit(
+          FetchUserSuccessState(
+            userData: user,
+          ),
+        );
+      } catch (e) {
+        emit(
+          FetchUserErrorState(
+            message: e.toString(),
+          ),
+        );
+      }
+    });
 
     on<SignUpEvent>((event, emit) async {
       emit(AuthLoading());
@@ -32,6 +53,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> with LogMixin, HydratedMixin {
         final UserModel user = await authRepository.signUpwithEmailAndPassword(
             password: event.password, email: event.email);
         warningLog('$user');
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('userId', user.userId!);
+        await prefs.setString('username', user.email!);
+        await prefs.setString('email', event.email);
+        await prefs.setString('documentId', user.documentId!);
+        await prefs.setBool('showOnboarding', true);
+        debugLog('Shared preference data $prefs');
         emit(
           AuthSuccess(
             email: event.email,
@@ -122,12 +150,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> with LogMixin, HydratedMixin {
     on<LogInEvent>((event, emit) async {
       emit(AuthLoading());
       try {
-        final String? userId = await authRepository.logInWithUserCredential(
+        final UserModel? userId = await authRepository.logInWithUserCredential(
             email: event.email, password: event.password);
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('userId', userId!.userId!);
+        await prefs.setString('documentId', userId.documentId!);
+        await prefs.setString('username', event.email);
+        await prefs.setString('email', event.email);
+        await prefs.setBool('showOnboarding', false);
         emit(
           AuthSuccess(
             email: event.email,
-            userId: userId!,
+            userId: userId.userId,
+            documentID: userId.documentId,
+            showOnBoarding: false,
           ),
         );
       }
@@ -218,22 +254,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> with LogMixin, HydratedMixin {
       }
     });
 
-    on<FetchUserDetailsFromServer>((event, emit) async {
-      emit(GetDataLoadingState());
-      try {
-        final UserModel userModel =
-            await authRepository.fetchUserDetails(userId: event.userId);
-        emit(
-          UserDataFetched(userData: userModel),
-        );
-      } catch (e) {
-        emit(
-          ErrorFetchingUserData(
-            message: e.toString(),
-          ),
-        );
-      }
-    });
+    // on<FetchUserDetailsFromServer>((event, emit) async {
+    //   emit(GetDataLoadingState());
+    //   try {
+    //     final UserModel userModel =
+    //         await authRepository.fetchUserDetails(userId: event.userId);
+    //     emit(
+    //       UserDataFetched(userData: userModel),
+    //     );
+    //   } catch (e) {
+    //     emit(
+    //       ErrorFetchingUserData(
+    //         message: e.toString(),
+    //       ),
+    //     );
+    //   }
+    // });
 
     on<SignInWithPhoneCredentialsEvent>((event, emit) async {
       emit(SignInLoading());
@@ -336,26 +372,77 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> with LogMixin, HydratedMixin {
       }
     });
 
-    on<OnAppStart>((event, emit) {
-      warningLog(' the storage value $state');
-      emit(state);
+    on<OnAppStart>((event, emit) async {
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getString('userId');
+      final username = prefs.getString('username');
+      final email = prefs.getString('email');
+      final documentId = prefs.getString('documentId');
+      final showOnboarding = prefs.getBool('showOnboarding') ??
+          false; // Default to false if not found
+      debugLog('Retrieved Shared Preferences Data:');
+      debugLog('userId: ${prefs.getString('userId')}');
+      debugLog('username: ${prefs.getString('username')}');
+      debugLog('email: ${prefs.getString('email')}');
+      debugLog('documentId: ${prefs.getString('documentId')}');
+      debugLog('showOnboarding: ${prefs.getBool('showOnboarding')}');
+
+      if (userId != null && username != null && email != null) {
+        emit(
+          AuthSuccess(
+            userId: userId,
+            username: username,
+            email: email,
+            documentID: documentId,
+            showOnBoarding: showOnboarding,
+          ),
+        );
+      } else {
+        emit(AuthInitial());
+      }
     });
-    on<LogOutEvent>((event, emit) {
-      emit(ClearHydrateState());
+    on<LogOutEvent>((event, emit) async {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('userId');
+      await prefs.remove('username');
+      await prefs.remove('email');
+      await prefs.remove('documentId');
+      await prefs.remove('showOnboarding');
+      // Log that data has been cleared
+      warningLog('Shared Preferences Data Cleared');
+      emit(
+        AuthInitial(),
+      );
     });
     // on<ClearHydrateEvent>((event, emit) => emit(ClearHydrateState()));
   }
 
+  // @override
+  // AuthState? fromJson(Map<String, dynamic> json) {
+  //   warningLog('State pulled from storage $json');
+  //   return AuthSuccess.fromMap(json);
+  // }
   @override
   AuthState? fromJson(Map<String, dynamic> json) {
-    warningLog('State pulled from storage $json');
-    return AuthSuccess.fromMap(json);
+    errorLog('fromJson called with: $json'); // Log the raw JSON
+    try {
+      final state = AuthSuccess.fromMap(json); // Attempt deserialization
+      errorLog(
+          'State loaded from storage: $state'); // Log the deserialized state
+      return state;
+    } catch (e) {
+      errorLog(
+        'Error loading state from storage: $e',
+      );
+      return null; // Or handle the error differently, like returning an initial state
+    }
   }
 
   @override
   Map<String, dynamic>? toJson(AuthState state) {
     if (state is AuthSuccess) {
-      warningLog('what state is being stored $state');
+      warningLog(
+          'what state is being stored $state and toMap ${state.toMap()}');
       return state.toMap();
     }
     if (state is ClearHydrateState) {
