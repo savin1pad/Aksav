@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, sort_child_properties_last, prefer_const_literals_to_create_immutables, prefer_const_constructors_in_immutables, sized_box_for_whitespace, avoid_types_as_parameter_names, unused_field
+// ignore_for_file: prefer_const_constructors, sort_child_properties_last, prefer_const_literals_to_create_immutables, prefer_const_constructors_in_immutables, sized_box_for_whitespace, avoid_types_as_parameter_names, unused_field, deprecated_member_use
 
 part of home_view;
 
@@ -78,7 +78,7 @@ class _HomeMobileState extends State<_HomeMobile>
   // Define screens for each tab
   final List<Widget> _screens = [
     HomeScreenWidget(), // Replace with your actual Home screen widget
-    SocialScreenWidget(), // Replace with your Social screen widget
+    SocialscreenwidgetView(), // Replace with your Social screen widget
     ProfileScreenWidget(), // Replace with your Profile screen widget
   ];
 

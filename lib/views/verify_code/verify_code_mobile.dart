@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_constructors_in_immutables, unused_local_variable
+// ignore_for_file: prefer_const_constructors, prefer_const_constructors_in_immutables, unused_local_variable, use_build_context_synchronously
 
 part of verify_code_view;
 

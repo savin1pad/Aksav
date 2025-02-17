@@ -15,6 +15,7 @@ import 'package:journey/core/services/navigator_service.dart';
 import 'package:journey/global/constants.dart';
 
 import 'package:journey/views/login/login_view.dart';
+import 'package:journey/views/socialscreenwidget/socialscreenwidget_view.dart';
 import 'package:journey/views/survey_stack/survey_stack_view.dart';
 import 'package:journey/widgets/financedist.dart';
 import 'package:journey/widgets/goal_widget.dart';

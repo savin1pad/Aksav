@@ -17,6 +17,7 @@ import 'package:journey/views/rememberour/rememberour_view.dart';
 import 'package:journey/views/survey_1/survey_1_view.dart';
 import 'package:journey/views/survey_2/survey_2_view.dart';
 import 'package:journey/views/survey_3/survey_3_view.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';

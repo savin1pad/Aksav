@@ -250,7 +250,7 @@ class _LoginMobileState extends State<_LoginMobile>
             }
           },
           logo: 'assets/appicon.jpeg',
-          title: 'Journey',
+          title: 'Aksav',
           userValidator: (String? value) {
             if (value == null || value.trim().isEmpty) {
               return 'Must Contain a email';

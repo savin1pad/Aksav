@@ -26,6 +26,18 @@ class _SurveyStackMobileState extends State<_SurveyStackMobile> {
   final _backgroundColor = ConstantVars.maintheme;
   late AudioPlayer _audioPlayer;
 
+  Future<void> _requestPermissions() async {
+  final cameraStatus = await Permission.camera.status;
+  if (!cameraStatus.isGranted) {
+    await Permission.camera.request();
+  }
+
+  final photosStatus = await Permission.photos.status;
+  if (!photosStatus.isGranted) {
+    await Permission.photos.request();
+  }
+}
+
   final _colors = [
     ConstantVars.maintheme,
     ConstantVars.cardColorTheme,
@@ -44,7 +56,7 @@ class _SurveyStackMobileState extends State<_SurveyStackMobile> {
   @override
   void initState() {
     super.initState();
-
+    _requestPermissions();
     cards = [
       const Survey1View(),
       const Survey2View(),
