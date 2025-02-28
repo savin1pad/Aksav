@@ -38,5 +38,6 @@
         "xfile"
     ],
     "C_Cpp.errorSquiggles": "disabled",
-    "github.copilot.advanced": {}
+    "github.copilot.advanced": {},
+    "java.configuration.updateBuildConfiguration": "interactive"
 }
