@@ -1,75 +1,64 @@
 // lib/models/zettel_note.dart
 
-class ZettelNote {
+import 'dart:io';
+
+import 'package:equatable/equatable.dart';
+
+class ZettelNote extends Equatable{
   final String id;
   final String title;
+  final String userId;
   final String content;
-  final List<String> imageUrls;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-   String? goalId;
-  // You can store links explicitly as well
+  final List<File> imageUrls;
+  final List<File> videoUrls;
   final List<String> linkedNoteIds;
 
-  ZettelNote({
-    required this.id,
-    required this.title,
-    required this.content,
-     this.goalId,
-    required this.imageUrls,
-    required this.createdAt,
-    required this.updatedAt,
-    required this.linkedNoteIds,
-  });
+ const ZettelNote({required this.id,required this.userId, required this.title, required this.content, required this.imageUrls, required this.videoUrls, required this.linkedNoteIds});
 
-  // Create from JSON
-  factory ZettelNote.fromMap(String id, Map<dynamic, dynamic> data) {
+  ZettelNote copyWith({
+    String? id,
+    String? title,
+    String? userId,
+    String? content,
+    List<File>? imageUrls,
+    List<File>? videoUrls,
+    List<String>? linkedNoteIds,
+  }) {
     return ZettelNote(
-      id: id,
-      goalId: data['goalId'] ?? '',
-      title: data['title'] ?? '',
-      content: data['content'] ?? '',
-      imageUrls: data['imageUrls'] == null
-          ? []
-          : List<String>.from(data['imageUrls'] as List),
-      createdAt: DateTime.fromMillisecondsSinceEpoch(data['createdAt'] ?? 0),
-      updatedAt: DateTime.fromMillisecondsSinceEpoch(data['updatedAt'] ?? 0),
-      linkedNoteIds: data['linkedNoteIds'] == null
-          ? []
-          : List<String>.from(data['linkedNoteIds'] as List),
+      id: id ?? this.id,
+      title: title ?? this.title,
+      userId: userId ?? this.userId,
+      content: content ?? this.content,
+      imageUrls: imageUrls ?? this.imageUrls,
+      videoUrls: videoUrls ?? this.videoUrls,
+      linkedNoteIds: linkedNoteIds ?? this.linkedNoteIds,
     );
   }
 
-  // Convert to JSON
+  factory ZettelNote.fromJson(Map<String, dynamic> json) {
+    return ZettelNote(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      userId: json['userId'] as String,
+      content: json['content'] as String,
+      imageUrls: (json['imageUrls'] as List).map((e) => e as File).toList(),
+      videoUrls: (json['videoUrls'] as List).map((e) => e as File).toList(),
+      linkedNoteIds: (json['linkedNoteIds'] as List).map((e) => e as String).toList(),
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'title': title,
       'content': content,
+      'userId': userId,
       'imageUrls': imageUrls,
-      'goalId': goalId,
-      'createdAt': createdAt.millisecondsSinceEpoch,
-      'updatedAt': updatedAt.millisecondsSinceEpoch,
+      'videoUrls': videoUrls,
       'linkedNoteIds': linkedNoteIds,
     };
   }
 
-  ZettelNote copyWith({
-    String? title,
-    String? content,
-    String? goalId,
-    List<String>? imageUrls,
-    DateTime? updatedAt,
-    List<String>? linkedNoteIds,
-  }) {
-    return ZettelNote(
-      id: id,
-      title: title ?? this.title,
-      goalId: goalId ?? this.goalId,
-      content: content ?? this.content,
-      imageUrls: imageUrls ?? this.imageUrls,
-      createdAt: createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-      linkedNoteIds: linkedNoteIds ?? this.linkedNoteIds,
-    );
-  }
+  @override
+  List<Object?> get props => [id, title,userId, content, imageUrls, videoUrls, linkedNoteIds];
 }

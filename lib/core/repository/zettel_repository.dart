@@ -1,21 +1,26 @@
+// ignore_for_file: avoid_function_literals_in_foreach_calls
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:journey/core/logger.dart';
+import 'package:journey/core/models/zettelfolder.dart';
 import 'package:journey/core/models/zettelnote.dart';
 
 class ZettelRepository with LogMixin {
   final String baseUrl = 'https://story-c0de2-default-rtdb.asia-southeast1.firebasedatabase.app';
+  late final String authToken;
 
-  Future<ZettelNote> createZettel(ZettelNote zettel) async {
-    final url = Uri.parse('$baseUrl/Zettels.json');
+  Future<String?> createZettel(ZettelNote zettel) async {
+    final url = Uri.parse('$baseUrl/notes.json?auth=$authToken');
     try {
       final response = await http.post(
         url,
         body: json.encode(zettel.toJson()),
       );
 
-      if (response.statusCode == 200) {
-        return zettel;
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        return data['name'] as String;
       } else {
         throw Exception('Failed to create zettel');
       }
@@ -26,6 +31,7 @@ class ZettelRepository with LogMixin {
   }
 
   Future<List<ZettelNote>> getUserZettels(String userId) async {
+    List<ZettelNote> zettelnotes = [];
     final url = Uri.parse(
       '$baseUrl/Zettels.json?orderBy="userId"&equalTo="$userId"',
     );
@@ -34,9 +40,9 @@ class ZettelRepository with LogMixin {
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as List;
         warningLog('checking for length ${data.length} and the decoded response body $data');
-        final zettelmodel = data.map((e) => ZettelNote.fromMap(e['id'], e)).toList();
-        warningLog('zettelmodels $zettelmodel');
-        return zettelmodel;
+        zettelnotes = data.map((e) => ZettelNote.fromJson(e)).toList();
+        warningLog('zettelmodels $zettelnotes');
+        return zettelnotes;
       } else {
         throw Exception('Failed to load zettels');
       }
@@ -78,13 +84,47 @@ class ZettelRepository with LogMixin {
     }
   }
 
+  Future<bool> deleteNote(String noteID)async{
+    final url = Uri.parse('$baseUrl/Zettels/$noteID.json');
+    try{
+      final response = await http.delete(url);
+      if(response.statusCode == 200){
+        return true;
+      } else {
+        throw Exception('Failed to delete note');
+      }
+    } catch (e) {
+      errorLog('Error deleting note: $e');
+      rethrow;
+    }
+  }
+
+  Future<String?> createFolder(ZettelFolder folder) async{
+    final url = Uri.parse('$baseUrl/ZettelFolders.json?auth=$authToken');
+    try{
+      final response = await http.post(
+        url,
+        body: json.encode(folder.toJson()),
+      );
+      if(response.statusCode == 200 || response.statusCode == 201){
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        return data['name'] as String;
+      } else {
+        throw Exception('Failed to create folder');
+      }
+    } catch (e) {
+      errorLog('Error creating folder: $e');
+      rethrow;
+    }
+  }
+
   Future<List<ZettelNote>> searchNotesByTitle(String title)async{
     final url = Uri.parse('$baseUrl/Zettels.json?orderBy="title"&equalTo="$title"');
     try{
       final response =  await http.get(url);
       if(response.statusCode == 200){
         final data = json.decode(response.body) as List;
-        final zettelmodels = data.map((e) => ZettelNote.fromMap(e['id'], e)).toList();
+        final zettelmodels = data.map((e) => ZettelNote.fromJson(e['id'])).toList();
         warningLog('zettelmodels $zettelmodels');
         return zettelmodels;
         } else {

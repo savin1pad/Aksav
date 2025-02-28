@@ -28,7 +28,7 @@ class _NotesViewMobile extends StatelessWidget {
                       tag: '${note.id}_image_$index',
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
+                        child: Image.file(
                           url,
                           width: 160,
                           fit: BoxFit.cover,
@@ -42,11 +42,11 @@ class _NotesViewMobile extends StatelessWidget {
             Text(note.content),
             const SizedBox(height: 16),
             Text(
-              'Created: ${note.createdAt}',
+              'Created: ${note.id}',
               style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
             Text(
-              'Updated: ${note.updatedAt}',
+              'Updated: ${note.id}',
               style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
           ],
