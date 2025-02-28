@@ -1,6 +1,9 @@
 library graphview_view;
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_randomcolor/flutter_randomcolor.dart';
 import 'package:graphview/GraphView.dart';
 import 'package:journey/core/models/zettelnote.dart';
 import 'package:journey/views/noteseditscreen/mobile/noteseditscreen_mobile.dart';

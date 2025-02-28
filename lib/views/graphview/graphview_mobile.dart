@@ -4,7 +4,7 @@ part of graphview_view;
 
 class _GraphViewMobile extends StatefulWidget {
    final List<ZettelNote> notes;
-  const _GraphViewMobile({required this.notes});
+  const _GraphViewMobile({required this.notes, Key? key}) : super(key: key);
 
   @override
   State<_GraphViewMobile> createState() => _GraphViewMobileState();
@@ -12,7 +12,7 @@ class _GraphViewMobile extends StatefulWidget {
 
 class _GraphViewMobileState extends State<_GraphViewMobile> with SingleTickerProviderStateMixin{
   final Graph _graph = Graph();
-  BuchheimWalkerConfiguration _builder = BuchheimWalkerConfiguration();
+  late FruchtermanReingoldAlgorithm builder;
   late AnimationController _controller;
   late Animation<double> _fadeanimation;
   late Animation<Offset> _scaleanimation;
@@ -55,19 +55,23 @@ class _GraphViewMobileState extends State<_GraphViewMobile> with SingleTickerPro
       nodeMap[note.id] = node;
       _graph.addNode(node);
     }
-    // A simple approach: link each noe to the next so we can see some edges
-    // or parse note.linkedNoteIds, etc. Adapt to your logic
-    final sorted = widget.notes.toList()
-      ..sort((a, b) => a.content.compareTo(b.content));
-    for (int i = 0; i < sorted.length - 1; i++) {
-      _graph.addEdge(nodeMap[sorted[i].id]!, nodeMap[sorted[i + 1].id]!);
-    }
 
-    _builder
-      ..siblingSeparation = (100)
-      ..levelSeparation = (150)
-      ..subtreeSeparation = (150)
-      ..orientation = BuchheimWalkerConfiguration.ORIENTATION_LEFT_RIGHT;
+    for(var note in widget.notes){
+      final sourceNode = nodeMap[note.id];
+      if(sourceNode == null) return;
+      for(var linkedId in note.linkedNoteIds){
+        final targetNode = nodeMap[linkedId];
+        if(targetNode != null){
+          if(!_graph.edges.any((edge) => 
+          (edge.source == sourceNode && edge.destination == targetNode) ||
+          (edge.source == targetNode && edge.destination == sourceNode )
+          )){     
+            _graph.addEdge(sourceNode, targetNode);
+          }
+        }
+      }
+    }
+    builder = FruchtermanReingoldAlgorithm(iterations: 1000);
   }
 
   Widget _buildNoteNode(ZettelNote note) {
@@ -143,92 +147,63 @@ class _GraphViewMobileState extends State<_GraphViewMobile> with SingleTickerPro
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Zettelkasten Brain (RTDB)'),
-      ),
-      drawer: Drawer(
-        child: FadeTransition(
+    return Stack(
+      children: [
+        // Starry background
+        FadeTransition(
           opacity: _fadeanimation,
-          child: SlideTransition(
-            position: _scaleanimation,
-            child: ListView(
-              children:  [
-               SlideTransition(
-                position: _scaleanimation,
-                 child: const DrawerHeader(
-                    decoration: BoxDecoration(
-                      color: Colors.purple,
-                    ),
-                    child:  Center(
-                      child: Text(
-                        'Notes',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                        ),
-                      ),
-                    ),
-                  ),
-               ),
-                ListTile(
-                  title: const Text('Notes'),
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  title: const Text('Graph View'),
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                ),
-              ],
+          child: Positioned.fill(
+            child: CustomPaint(
+              painter: StarryBackgroundPainter(),
             ),
           ),
         ),
-      ),
-      body:widget.notes.isEmpty ? Center(child: Container(
-        width: 200,
-        height: 200,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-          gradient:const LinearGradient(colors: [
-            Colors.purpleAccent,
-            Colors.purple,
-             ],
-           stops:  [0.0, 0.7],  
+        SlideTransition(
+          position: _scaleanimation,
+          child: InteractiveViewer(
+            boundaryMargin:const EdgeInsets.all(100),
+            minScale: 0.01,
+            maxScale: 5.0,
+            child: GraphView(
+              graph: _graph,
+              algorithm: builder,
+              builder: (Node node) {
+                // node.key = GlobalKey() if needed
+                return node.data!;
+              },
             ),
-          border: Border.all(color: Colors.black),
-        ),
-        child:const Center(
-          child: Text('No Notes Found', style: TextStyle(color: Colors.white,
-           ),
           ),
         ),
-       ),
-      ): InteractiveViewer(
-        boundaryMargin: const EdgeInsets.all(100),
-        constrained: false,
-        minScale: 0.01,
-        maxScale: 5.0,
-        child: GraphView(
-          graph: _graph,
-          algorithm: BuchheimWalkerAlgorithm(_builder, TreeEdgeRenderer(_builder)),
-          paint: Paint()
-            ..color = Colors.grey
-            ..strokeWidth = 1
-            ..style = PaintingStyle.stroke,
-            builder: (node){
-              var a = node.key?.value as dynamic;
-              return containerboiler(a);
-            },
-         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _createNote,
-        child: const Icon(Icons.add),
-      ),
+        SlideTransition(
+          position: _scaleanimation,
+          child: Positioned(
+            bottom: 16,
+            right: 16,
+            child: FloatingActionButton(
+              onPressed: _createNote,
+              child: const Icon(Icons.add),
+            ),
+          ),
+        ),
+      ],
     );
   }
+}
+
+class StarryBackgroundPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = Colors.black.withOpacity(0.5);
+
+    // Draw random stars
+    final random = RandomColor();
+    for (int i = 0; i < 100; i++) {
+      final dx = (size.width) * (Random.secure().nextDouble());
+      final dy = (size.height) * (Random.secure().nextDouble());
+      canvas.drawCircle(Offset(dx, dy), 1.5, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
