@@ -349,7 +349,7 @@ class _NoteseditscreenMobileState extends State<NoteseditscreenMobile>
                           children: [
                             TextField(
                               controller: _contentController,
-                              maxLines: 20,
+                              maxLines: 18,
                               keyboardType: TextInputType.multiline,
                               style: const TextStyle(color: Colors.white),
                               decoration: const InputDecoration(
@@ -450,9 +450,6 @@ class _NoteseditscreenMobileState extends State<NoteseditscreenMobile>
                             ),
                           )
                         : Container(),
-                    const SizedBox(
-                      height: 10.0,
-                    ),
                     _videoUrls.isNotEmpty
                         ? FadeTransition(
                             opacity: _imageAnimation,
@@ -511,9 +508,6 @@ class _NoteseditscreenMobileState extends State<NoteseditscreenMobile>
                             ),
                           )
                         : Container(),
-                    const SizedBox(
-                      height: 8.0,
-                    ),
                     AnimatedBuilder(
                       animation: _animationcontroller,
                       builder: (context, child) {

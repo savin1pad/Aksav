@@ -2,6 +2,7 @@ library notesview_view;
 
 import 'package:flutter/material.dart';
 import 'package:journey/core/models/zettelnote.dart';
+import 'package:journey/widgets/space_background.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 part 'notesview_mobile.dart';

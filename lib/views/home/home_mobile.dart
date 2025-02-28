@@ -120,7 +120,7 @@ class _HomeMobileState extends State<_HomeMobile>
                   });
                 },
                 backgroundColor: AppTheme.blackHole.withOpacity(0.7),
-                color: AppTheme.deepSpace.withOpacity(0.5),
+                color: AppTheme.deepSpace,
                 items: const <Widget>[
                   Icon(Icons.home, size: 30, color: Colors.white),
                   Icon(Icons.group, size: 30, color: Colors.white),
