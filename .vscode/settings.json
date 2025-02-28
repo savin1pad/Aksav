@@ -1,8 +1,10 @@
 {
     "cmake.configureOnOpen": true,
     "cSpell.words": [
+        "animationcontroller",
         "audioplayers",
         "autoptr",
+        "checkin",
         "CREATESTRUCT",
         "DEFAULTTONEAREST",
         "DPICHANGED",
@@ -35,7 +37,11 @@
         "vsync",
         "WNDCLASS",
         "WPARAM",
-        "xfile"
+        "xfile",
+        "Zettel",
+        "zettelmodels",
+        "zettelnotes",
+        "zettels"
     ],
     "C_Cpp.errorSquiggles": "disabled",
     "github.copilot.advanced": {},

@@ -102,14 +102,7 @@ class _HomeMobileState extends State<_HomeMobile>
                 position: _slideAnimation,
                 child: FadeTransition(
                   opacity: _fadeAnimation,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: gradientColors,
-                      ),
-                    ),
+                  child: SpaceBackground(
                     child: _screens[_selectedIndex],
                   ),
                 ),
@@ -126,14 +119,57 @@ class _HomeMobileState extends State<_HomeMobile>
                     _fadeController.forward();
                   });
                 },
-                backgroundColor: Colors.transparent,
-                color: const Color(0xFF2E3192),
+                backgroundColor: AppTheme.blackHole.withOpacity(0.7),
+                color: AppTheme.deepSpace.withOpacity(0.5),
                 items: const <Widget>[
                   Icon(Icons.home, size: 30, color: Colors.white),
                   Icon(Icons.group, size: 30, color: Colors.white),
                   Icon(Icons.person, size: 30, color: Colors.white),
                 ],
               ),
+              // bottomNavigationBar: Container(
+              //   decoration: BoxDecoration(
+              //     boxShadow: [
+              //       BoxShadow(
+              //         color: AppTheme.deepSpace.withOpacity(0.5),
+              //         blurRadius: 10,
+              //         spreadRadius: 5,
+              //       ),
+              //     ],
+              //   ),
+              //   child: ClipRRect(
+              //     borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              //     child: BackdropFilter(
+              //       filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              //       child: BottomNavigationBar(
+              //         currentIndex: _selectedIndex,
+              //         onTap: (index) {
+              //           setState(() {
+              //             _selectedIndex = index;
+              //           });
+              //         },
+              //         backgroundColor: AppTheme.deepSpace.withOpacity(0.7),
+              //         selectedItemColor: AppTheme.galaxyBlue,
+              //         unselectedItemColor: AppTheme.starWhite.withOpacity(0.5),
+              //         elevation: 0,
+              //         items: [
+              //           BottomNavigationBarItem(
+              //             icon: Icon(Icons.home),
+              //             label: 'Home',
+              //           ),
+              //           BottomNavigationBarItem(
+              //             icon: Icon(Icons.people),
+              //             label: 'Social',
+              //           ),
+              //           BottomNavigationBarItem(
+              //             icon: Icon(Icons.person),
+              //             label: 'Profile',
+              //           ),
+              //         ],
+              //       ),
+              //     ),
+              //   ),
+              // ),
             ),
           ),
         );
@@ -293,14 +329,16 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
       child: Scaffold(
         body: RefreshIndicator(
           onRefresh: _fetchFinanceAndGoals,
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Column(
-              children: [
-                _buildDashboardHeader(),
-                const SizedBox(height: 20),
-                _buildGoalsCarousel(),
-              ],
+          child: SpaceBackground(
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                children: [
+                  _buildDashboardHeader(),
+                  const SizedBox(height: 20),
+                  _buildGoalsCarousel(),
+                ],
+              ),
             ),
           ),
         ),
@@ -381,27 +419,29 @@ class _SocialScreenWidgetState extends State<SocialScreenWidget>
                         .toList();
 
                     if (socialGoals.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Lottie.asset(
-                              'assets/survey2.json',
-                              height: 200,
-                              width: 200,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Text(
-                                'No social goals yet!\nMake your goals social to see them here.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey[600],
+                      return SpaceBackground(
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Lottie.asset(
+                                'assets/survey2.json',
+                                height: 200,
+                                width: 200,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Text(
+                                  'No social goals yet!\nMake your goals social to see them here.',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey[600],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       );
                     }
@@ -507,115 +547,123 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget>
       builder: (context, state) {
         return Scaffold(
           body: isLoading
-              ? Center(
-                  child: CircularProgressIndicator(),
+              ? SpaceBackground(
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
                 )
-              : SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      Stack(
-                        clipBehavior: Clip.none,
-                        alignment: Alignment.center,
-                        children: [
-                          // Background gradient and wave
-                          Container(
-                            height: 200,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [Colors.blue[400]!, Colors.blue[800]!],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
+              : SpaceBackground(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        Stack(
+                          clipBehavior: Clip.none,
+                          alignment: Alignment.center,
+                          children: [
+                            // Background gradient and wave
+                            Container(
+                              height: 200,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.blue[400]!,
+                                    Colors.blue[800]!
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                              ),
+                              child: Lottie.asset(
+                                'assets/survey2.json',
+                                fit: BoxFit.fill,
                               ),
                             ),
-                            child: Lottie.asset(
-                              'assets/survey2.json',
-                              fit: BoxFit.fill,
-                            ),
-                          ),
-                          // Profile picture
-                          Positioned(
-                            bottom: -50,
-                            child: CircleAvatar(
-                              radius: 60,
-                              backgroundColor: Colors.white,
+                            // Profile picture
+                            Positioned(
+                              bottom: -50,
                               child: CircleAvatar(
-                                radius: 55,
-                                backgroundImage: user.photoUrl != null
-                                    ? NetworkImage(user.photoUrl!)
-                                    : const AssetImage('assets/icon.jpeg')
-                                        as ImageProvider,
+                                radius: 60,
+                                backgroundColor: Colors.white,
+                                child: CircleAvatar(
+                                  radius: 55,
+                                  backgroundImage: user.photoUrl != null
+                                      ? NetworkImage(user.photoUrl!)
+                                      : const AssetImage('assets/icon.jpeg')
+                                          as ImageProvider,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 60),
-                      FadeTransition(
-                        opacity: _fadeAnimation,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            children: [
-                              Text(
-                                latestGoal?.id ?? 'Anonymous User',
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
+                          ],
+                        ),
+                        const SizedBox(height: 60),
+                        FadeTransition(
+                          opacity: _fadeAnimation,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              children: [
+                                Text(
+                                  latestGoal?.id ?? 'Anonymous User',
+                                  style: const TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white),
                                 ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                user.email ?? '',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                              const SizedBox(height: 32),
-                              _buildInfoCard(
-                                title: 'Your Dream',
-                                value: latestGoal?.goal ?? 'Not set',
-                                icon: Icons.star,
-                                animation: 'assets/survey2.json',
-                              ),
-                              _buildInfoCard(
-                                title: 'Target Amount',
-                                value: latestGoal?.targetAmount.toString() ??
-                                    'Not set',
-                                icon: Icons.attach_money,
-                                animation: 'assets/money.json',
-                              ),
-                              _buildInfoCard(
-                                title: 'Allocated Amount',
-                                value: latestGoal?.allocatedAmount.toString() ??
-                                    'Not set',
-                                icon: Icons.trending_up,
-                                animation: 'assets/notsure.json',
-                              ),
-                              const SizedBox(height: 20),
-                              ElevatedButton.icon(
-                                onPressed: () {
-                                  log('clicked', name: "profile screen");
-                                  context
-                                      .read<AuthBloc>()
-                                      .add(ClearHydrateEvent());
-                                },
-                                icon: const Icon(Icons.logout),
-                                label: const Text('Logout'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 32,
-                                    vertical: 12,
+                                const SizedBox(height: 8),
+                                Text(
+                                  user.email ?? '',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white,
                                   ),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 32),
+                                _buildInfoCard(
+                                  title: 'Your Dream',
+                                  value: latestGoal?.goal ?? 'Not set',
+                                  icon: Icons.star,
+                                  animation: 'assets/survey2.json',
+                                ),
+                                _buildInfoCard(
+                                  title: 'Target Amount',
+                                  value: latestGoal?.targetAmount.toString() ??
+                                      'Not set',
+                                  icon: Icons.attach_money,
+                                  animation: 'assets/money.json',
+                                ),
+                                _buildInfoCard(
+                                  title: 'Allocated Amount',
+                                  value:
+                                      latestGoal?.allocatedAmount.toString() ??
+                                          'Not set',
+                                  icon: Icons.trending_up,
+                                  animation: 'assets/notsure.json',
+                                ),
+                                const SizedBox(height: 20),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    log('clicked', name: "profile screen");
+                                    context
+                                        .read<AuthBloc>()
+                                        .add(ClearHydrateEvent());
+                                  },
+                                  icon: const Icon(Icons.logout),
+                                  label: const Text('Logout'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 32,
+                                      vertical: 12,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
         );

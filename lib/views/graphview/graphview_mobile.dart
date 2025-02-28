@@ -1,21 +1,23 @@
-// ignore_for_file: prefer_final_fields
+// ignore_for_file: prefer_final_fields, unused_local_variable
 
 part of graphview_view;
 
 class _GraphViewMobile extends StatefulWidget {
-   final List<ZettelNote> notes;
+  final List<ZettelNote> notes;
   const _GraphViewMobile({required this.notes, Key? key}) : super(key: key);
 
   @override
   State<_GraphViewMobile> createState() => _GraphViewMobileState();
 }
 
-class _GraphViewMobileState extends State<_GraphViewMobile> with SingleTickerProviderStateMixin{
+class _GraphViewMobileState extends State<_GraphViewMobile>
+    with SingleTickerProviderStateMixin {
   final Graph _graph = Graph();
   late FruchtermanReingoldAlgorithm builder;
   late AnimationController _controller;
   late Animation<double> _fadeanimation;
   late Animation<Offset> _scaleanimation;
+  String? _selectedNoteId;
 
   @override
   void initState() {
@@ -24,8 +26,11 @@ class _GraphViewMobileState extends State<_GraphViewMobile> with SingleTickerPro
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
-    _fadeanimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.bounceInOut));
-    _scaleanimation = Tween<Offset>(begin:const Offset(-1.0, 0.0), end: Offset.zero).animate(CurvedAnimation(parent: _controller, curve: Curves.bounceInOut));
+    _fadeanimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(parent: _controller, curve: Curves.bounceInOut));
+    _scaleanimation =
+        Tween<Offset>(begin: const Offset(-1.0, 0.0), end: Offset.zero).animate(
+            CurvedAnimation(parent: _controller, curve: Curves.bounceInOut));
     _controller.forward();
     _buildGraph();
   }
@@ -56,17 +61,23 @@ class _GraphViewMobileState extends State<_GraphViewMobile> with SingleTickerPro
       _graph.addNode(node);
     }
 
-    for(var note in widget.notes){
+    for (var note in widget.notes) {
       final sourceNode = nodeMap[note.id];
-      if(sourceNode == null) return;
-      for(var linkedId in note.linkedNoteIds){
+      if (sourceNode == null) return;
+      for (var linkedId in note.linkedNoteIds) {
         final targetNode = nodeMap[linkedId];
-        if(targetNode != null){
-          if(!_graph.edges.any((edge) => 
-          (edge.source == sourceNode && edge.destination == targetNode) ||
-          (edge.source == targetNode && edge.destination == sourceNode )
-          )){     
-            _graph.addEdge(sourceNode, targetNode);
+        if (targetNode != null) {
+          if (!_graph.edges.any((edge) =>
+              (edge.source == sourceNode && edge.destination == targetNode) ||
+              (edge.source == targetNode && edge.destination == sourceNode))) {
+            _graph.addEdge(
+              sourceNode,
+              targetNode,
+              paint: Paint()
+                ..color = AppTheme.starWhite
+                ..strokeWidth = 1.5
+                ..strokeCap = StrokeCap.round,
+            );
           }
         }
       }
@@ -75,43 +86,15 @@ class _GraphViewMobileState extends State<_GraphViewMobile> with SingleTickerPro
   }
 
   Widget _buildNoteNode(ZettelNote note) {
-    return GestureDetector(
-      onTap: () => _openDetail(note),
-      child: Card(
-        color: Colors.white,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (note.imageUrls.isNotEmpty)
-              Hero(
-                tag: '${note.id}_image_0',
-                child: Image.file(
-                  note.imageUrls.first,
-                  width: 60,
-                  height: 60,
-                  fit: BoxFit.cover,
-                ),
-              )
-            else
-              Container(
-                color: Colors.grey.shade300,
-                width: 60,
-                height: 60,
-                alignment: Alignment.center,
-                child: const Icon(Icons.image_not_supported),
-              ),
-            Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: Text(
-                note.title,
-                style: const TextStyle(fontSize: 12),
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-      ),
+    return NoteNodeWidget(
+      note: note,
+      isSelected: note.id == _selectedNoteId,
+      onTap: () {
+        setState(() {
+          _selectedNoteId = note.id;
+        });
+        _openDetail(note);
+      },
     );
   }
 
@@ -119,7 +102,11 @@ class _GraphViewMobileState extends State<_GraphViewMobile> with SingleTickerPro
     Navigator.push(
       context,
       CustomPageRoute(child: NotesView(zettelNote: note)),
-    );
+    ).then((_) {
+      setState(() {
+        _selectedNoteId = null;
+      });
+    });
   }
 
   Future<void> _createNote() async {
@@ -128,64 +115,114 @@ class _GraphViewMobileState extends State<_GraphViewMobile> with SingleTickerPro
       CustomPageRoute(child: const NoteseditscreenMobile()),
     );
     if (result != null) {
-      // We rely on the real-time stream to refresh the UI, so no need to do anything else here
+      setState(() {});
     }
   }
 
-  Widget containerboiler(dynamic a){
+  Widget containerboiler(dynamic a) {
     return Container(
-      width:100,
+      width: 100,
       height: 100,
       decoration: BoxDecoration(
         color: Colors.red,
         borderRadius: BorderRadius.circular(15),
         border: Border.all(color: Colors.black),
       ),
-      child: Text(a.toString(),),
+      child: Text(
+        a.toString(),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // Starry background
-        FadeTransition(
-          opacity: _fadeanimation,
-          child: Positioned.fill(
-            child: CustomPaint(
-              painter: StarryBackgroundPainter(),
+    return PopScope(
+      canPop: false,
+      child: SpaceBackground(
+        child: Stack(
+          children: [
+            Center(
+              child: AnimatedBuilder(
+                animation: _controller,
+                builder: (context, child) {
+                  return FadeTransition(
+                    opacity: _fadeanimation,
+                    child: SlideTransition(
+                      position: _scaleanimation,
+                      child: InteractiveViewer(
+                        boundaryMargin: const EdgeInsets.all(100),
+                        minScale: 0.1,
+                        maxScale: 2.5,
+                        child: GraphView(
+                          graph: _graph,
+                          algorithm: builder,
+                          paint: Paint()
+                            ..color = AppTheme.starWhite.withOpacity(0.6)
+                            ..strokeWidth = 1.5
+                            ..strokeCap = StrokeCap.round,
+                          builder: (node) {
+                            return node.key!.value;
+                          },
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-        ),
-        SlideTransition(
-          position: _scaleanimation,
-          child: InteractiveViewer(
-            boundaryMargin:const EdgeInsets.all(100),
-            minScale: 0.01,
-            maxScale: 5.0,
-            child: GraphView(
-              graph: _graph,
-              algorithm: builder,
-              builder: (Node node) {
-                // node.key = GlobalKey() if needed
-                return node.data!;
-              },
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                height: 60,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    AppTheme.deepSpace,
+                    AppTheme.deepSpace.withOpacity(0.0),
+                  ],
+                )),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Cosmic Knowledge Map',
+                      style: AppTheme.headerStyle.copyWith(fontSize: 20),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.info_outline,
+                          color: AppTheme.starWhite),
+                      onPressed: () {
+                        // Show help/info about the graph view
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                            content: Text(
+                                'Explore your interconnected knowledge universe')));
+                      },
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ),
-        SlideTransition(
-          position: _scaleanimation,
-          child: Positioned(
-            bottom: 16,
-            right: 16,
-            child: FloatingActionButton(
-              onPressed: _createNote,
-              child: const Icon(Icons.add),
+            Positioned(
+              bottom: 16,
+              right: 16,
+              child: FloatingActionButton(
+                onPressed: _createNote,
+                backgroundColor: AppTheme.nebulaPurple,
+                elevation: 4,
+                child: const Icon(
+                  Icons.add,
+                  color: AppTheme.starWhite,
+                ),
+              ),
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
@@ -193,7 +230,7 @@ class _GraphViewMobileState extends State<_GraphViewMobile> with SingleTickerPro
 class StarryBackgroundPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = Colors.black.withOpacity(0.5);
+    final paint = Paint()..color = Colors.white.withOpacity(0.5);
 
     // Draw random stars
     final random = RandomColor();

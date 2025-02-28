@@ -4,7 +4,7 @@ import 'dart:io';
 
 import 'package:equatable/equatable.dart';
 
-class ZettelNote extends Equatable{
+class ZettelNote extends Equatable {
   final String id;
   final String title;
   final String userId;
@@ -13,7 +13,14 @@ class ZettelNote extends Equatable{
   final List<File> videoUrls;
   final List<String> linkedNoteIds;
 
- const ZettelNote({required this.id,required this.userId, required this.title, required this.content, required this.imageUrls, required this.videoUrls, required this.linkedNoteIds});
+  const ZettelNote(
+      {required this.id,
+      required this.userId,
+      required this.title,
+      required this.content,
+      required this.imageUrls,
+      required this.videoUrls,
+      required this.linkedNoteIds});
 
   ZettelNote copyWith({
     String? id,
@@ -41,9 +48,18 @@ class ZettelNote extends Equatable{
       title: json['title'] as String,
       userId: json['userId'] as String,
       content: json['content'] as String,
-      imageUrls: (json['imageUrls'] as List).map((e) => e as File).toList(),
-      videoUrls: (json['videoUrls'] as List).map((e) => e as File).toList(),
-      linkedNoteIds: (json['linkedNoteIds'] as List).map((e) => e as String).toList(),
+      imageUrls: (json['imageUrls'] as List<dynamic>?)
+              ?.map((e) => File(e.toString()))
+              .toList() ??
+          [],
+      videoUrls: (json['videoUrls'] as List<dynamic>?)
+              ?.map((e) => File(e.toString()))
+              .toList() ??
+          [],
+      linkedNoteIds: (json['linkedNoteIds'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
     );
   }
 
@@ -60,5 +76,6 @@ class ZettelNote extends Equatable{
   }
 
   @override
-  List<Object?> get props => [id, title,userId, content, imageUrls, videoUrls, linkedNoteIds];
+  List<Object?> get props =>
+      [id, title, userId, content, imageUrls, videoUrls, linkedNoteIds];
 }

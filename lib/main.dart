@@ -21,6 +21,7 @@ import 'package:journey/core/repository/chat_repository.dart';
 import 'package:journey/core/repository/goal_log_repository.dart';
 import 'package:journey/core/repository/goal_repository.dart';
 import 'package:journey/core/repository/storage_repository.dart';
+import 'package:journey/core/repository/zettel_repository.dart';
 import 'package:journey/views/home/home_view.dart';
 import 'package:journey/views/login/login_view.dart';
 import 'package:journey/views/signup/signup_view.dart';
@@ -35,7 +36,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final directory = await getApplicationDocumentsDirectory();
   final lockFile = File('${directory.path}/hydrated_box.lock');
-  
+
   if (await lockFile.exists()) {
     await lockFile.delete();
   }
@@ -85,6 +86,9 @@ class MainApplication extends StatelessWidget {
         ),
         RepositoryProvider<GoalLogRepository>(
           create: (context) => GoalLogRepository(),
+        ),
+        RepositoryProvider<ZettelRepository>(
+          create: (context) => ZettelRepository(),
         ),
       ],
       child: MultiBlocProvider(

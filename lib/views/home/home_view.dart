@@ -1,6 +1,7 @@
 library home_view;
 
 import 'dart:developer';
+import 'dart:ui';
 
 import 'package:card_swiper/card_swiper.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
@@ -17,8 +18,10 @@ import 'package:journey/global/constants.dart';
 import 'package:journey/views/login/login_view.dart';
 import 'package:journey/views/socialscreenwidget/socialscreenwidget_view.dart';
 import 'package:journey/views/survey_stack/survey_stack_view.dart';
+import 'package:journey/widgets/apptheme.dart';
 import 'package:journey/widgets/financedist.dart';
 import 'package:journey/widgets/goal_widget.dart';
+import 'package:journey/widgets/space_background.dart';
 import 'package:lottie/lottie.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:flutter/material.dart';

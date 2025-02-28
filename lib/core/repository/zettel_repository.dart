@@ -7,11 +7,12 @@ import 'package:journey/core/models/zettelfolder.dart';
 import 'package:journey/core/models/zettelnote.dart';
 
 class ZettelRepository with LogMixin {
-  final String baseUrl = 'https://story-c0de2-default-rtdb.asia-southeast1.firebasedatabase.app';
+  final String baseUrl =
+      'https://story-c0de2-default-rtdb.asia-southeast1.firebasedatabase.app';
   late final String authToken;
 
   Future<String?> createZettel(ZettelNote zettel) async {
-    final url = Uri.parse('$baseUrl/notes.json?auth=$authToken');
+    final url = Uri.parse('$baseUrl/notes.json');
     try {
       final response = await http.post(
         url,
@@ -33,14 +34,18 @@ class ZettelRepository with LogMixin {
   Future<List<ZettelNote>> getUserZettels(String userId) async {
     List<ZettelNote> zettelnotes = [];
     final url = Uri.parse(
-      '$baseUrl/Zettels.json?orderBy="userId"&equalTo="$userId"',
+      '$baseUrl/notes.json?orderBy="userId"&equalTo="$userId"',
     );
     try {
       final response = await http.get(url);
+      warningLog(
+          'checkin for the url $url, and the response body ${response.body}');
       if (response.statusCode == 200) {
-        final data = json.decode(response.body) as List;
-        warningLog('checking for length ${data.length} and the decoded response body $data');
-        zettelnotes = data.map((e) => ZettelNote.fromJson(e)).toList();
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        warningLog(
+            'checking for length ${data.length} and the decoded response body $data');
+        zettelnotes =
+            data.entries.map((e) => ZettelNote.fromJson(e.value)).toList();
         warningLog('zettelmodels $zettelnotes');
         return zettelnotes;
       } else {
@@ -84,11 +89,11 @@ class ZettelRepository with LogMixin {
     }
   }
 
-  Future<bool> deleteNote(String noteID)async{
+  Future<bool> deleteNote(String noteID) async {
     final url = Uri.parse('$baseUrl/Zettels/$noteID.json');
-    try{
+    try {
       final response = await http.delete(url);
-      if(response.statusCode == 200){
+      if (response.statusCode == 200) {
         return true;
       } else {
         throw Exception('Failed to delete note');
@@ -99,14 +104,14 @@ class ZettelRepository with LogMixin {
     }
   }
 
-  Future<String?> createFolder(ZettelFolder folder) async{
+  Future<String?> createFolder(ZettelFolder folder) async {
     final url = Uri.parse('$baseUrl/ZettelFolders.json?auth=$authToken');
-    try{
+    try {
       final response = await http.post(
         url,
         body: json.encode(folder.toJson()),
       );
-      if(response.statusCode == 200 || response.statusCode == 201){
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final data = json.decode(response.body) as Map<String, dynamic>;
         return data['name'] as String;
       } else {
@@ -118,21 +123,23 @@ class ZettelRepository with LogMixin {
     }
   }
 
-  Future<List<ZettelNote>> searchNotesByTitle(String title)async{
-    final url = Uri.parse('$baseUrl/Zettels.json?orderBy="title"&equalTo="$title"');
-    try{
-      final response =  await http.get(url);
-      if(response.statusCode == 200){
+  Future<List<ZettelNote>> searchNotesByTitle(String title) async {
+    final url =
+        Uri.parse('$baseUrl/Zettels.json?orderBy="title"&equalTo="$title"');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
         final data = json.decode(response.body) as List;
-        final zettelmodels = data.map((e) => ZettelNote.fromJson(e['id'])).toList();
+        final zettelmodels =
+            data.map((e) => ZettelNote.fromJson(e['id'])).toList();
         warningLog('zettelmodels $zettelmodels');
         return zettelmodels;
-        } else {
-          throw Exception('Failed to search notes by title');
-        }
-      } catch (e) {
-        errorLog('Error searching notes by title: $e');
-        rethrow;
+      } else {
+        throw Exception('Failed to search notes by title');
       }
+    } catch (e) {
+      errorLog('Error searching notes by title: $e');
+      rethrow;
     }
   }
+}

@@ -8,7 +8,10 @@ import 'package:graphview/GraphView.dart';
 import 'package:journey/core/models/zettelnote.dart';
 import 'package:journey/views/noteseditscreen/mobile/noteseditscreen_mobile.dart';
 import 'package:journey/views/notesview/notesview_view.dart';
+import 'package:journey/widgets/apptheme.dart';
 import 'package:journey/widgets/custom_page_route.dart';
+import 'package:journey/widgets/nodewidget.dart';
+import 'package:journey/widgets/space_background.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 part 'graphview_mobile.dart';
@@ -23,7 +26,9 @@ class GraphViewComplete extends StatelessWidget {
   Widget build(BuildContext context) {
     return Builder(builder: (context) {
       return ScreenTypeLayout(
-        mobile: _GraphViewMobile(notes: zettelNote,),
+        mobile: _GraphViewMobile(
+          notes: zettelNote,
+        ),
         desktop: const _GraphViewDesktop(),
         tablet: const _GraphViewTablet(),
       );
