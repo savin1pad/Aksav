@@ -31,6 +31,27 @@ class ZettelRepository with LogMixin {
     }
   }
 
+    Future<ZettelNote> getZettelById(String zettelId) async {
+    final url = Uri.parse('$baseUrl/notes/$zettelId.json');
+    try {
+      final response = await http.get(url);
+      
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data == null) {
+          throw Exception('Note not found');
+        }
+        
+        return ZettelNote.fromJson(data);
+      } else {
+        throw Exception('Failed to load note with ID: $zettelId');
+      }
+    } catch (e) {
+      errorLog('Error fetching zettel by ID: $e');
+      rethrow;
+    }
+  }
+
   Future<List<ZettelNote>> getUserZettels(String userId) async {
     List<ZettelNote> zettelnotes = [];
     final url = Uri.parse(
@@ -105,7 +126,7 @@ class ZettelRepository with LogMixin {
   }
 
   Future<String?> createFolder(ZettelFolder folder) async {
-    final url = Uri.parse('$baseUrl/ZettelFolders.json?auth=$authToken');
+    final url = Uri.parse('$baseUrl/ZettelFolders.json');
     try {
       final response = await http.post(
         url,
@@ -119,6 +140,43 @@ class ZettelRepository with LogMixin {
       }
     } catch (e) {
       errorLog('Error creating folder: $e');
+      rethrow;
+    }
+  }
+ 
+ Future<List<ZettelFolder>> getUserFolders(String userId)async{
+  final url = Uri.parse('$baseUrl/ZettelFolders.json?orderBy="userId"&equalTo="$userId"');
+  try{
+    final response = await http.get(url);
+    if(response.statusCode == 200){
+      final data = json.decode(response.body) as Map<String, dynamic>;
+      if(data.isEmpty){
+        return [];
+      }
+      final folders = data.entries.map((e) => ZettelFolder.fromJson(e.value)).toList();
+      return folders;
+    }else{
+      throw Exception('Failed to load folders');
+    }
+  }catch(e){
+    errorLog('Error fetching folders: $e');
+    rethrow;
+  }
+ }
+
+Future<void> updateFolder(ZettelFolder folder) async {
+    final url = Uri.parse('$baseUrl/ZettelFolders/${folder.id}.json');
+    try {
+      final response = await http.patch(
+        url,
+        body: json.encode(folder.toJson()),
+      );
+      
+      if (response.statusCode != 200) {
+        throw Exception('Failed to update folder');
+      }
+    } catch (e) {
+      errorLog('Error updating folder: $e');
       rethrow;
     }
   }

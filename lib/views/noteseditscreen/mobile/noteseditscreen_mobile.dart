@@ -30,6 +30,7 @@ class _NoteseditscreenMobileState extends State<NoteseditscreenMobile>
   List<File> _videoUrls = [];
   List<ZettelNote> allNotes = [];
   OverlayEntry? _overlayEntry;
+  bool _isLoading = false;
 
   String currentMention = '';
 
@@ -255,7 +256,48 @@ class _NoteseditscreenMobileState extends State<NoteseditscreenMobile>
     }
   }
 
+    // Add this to the _NoteseditscreenMobileState class
+  
+  // Process the content to extract references and update linkedNoteIds
+  void _processReferences() {
+    final content = _contentController.text;
+    final pattern = RegExp(r'@\[(.*?)\]');
+    final matches = pattern.allMatches(content);
+    
+    // Clear the existing linkedNoteIds to rebuild the list
+    _linkedNoteIds.clear();
+    
+    // For each reference found, try to match it with a note title
+    for (final match in matches) {
+      final title = match.group(1);
+      if (title != null && title.isNotEmpty) {
+        // Find the note with this title
+        final matchingNote = allNotes.firstWhere(
+          (note) => note.title.toLowerCase() == title.toLowerCase(),
+          orElse: () => const ZettelNote(
+            id: '',
+            title: '',
+            content: '',
+            userId: '',
+            imageUrls: [],
+            videoUrls: [],
+            linkedNoteIds: []
+          ),
+        );
+        
+        // If we found a matching note, add its ID to the linked list
+        if (matchingNote.id.isNotEmpty && !_linkedNoteIds.contains(matchingNote.id)) {
+          _linkedNoteIds.add(matchingNote.id);
+        }
+      }
+    }
+  }
+
+  // Now modify the _saveNote function to call _processReferences
   void _saveNote() async {
+    setState(() {
+      _isLoading = true;
+    });
     final title = _titleController.text.trim();
     final content = _contentController.text.trim();
     if (title.isEmpty || content.isEmpty) {
@@ -264,10 +306,17 @@ class _NoteseditscreenMobileState extends State<NoteseditscreenMobile>
           content: Text('Please enter a title and content'),
         ),
       );
+      setState(() {
+      _isLoading = true;
+    });
       return;
     }
+    
+    // Process the content for references
+    _processReferences();
+    
     final newNote = ZettelNote(
-      id: const Uuid().v4(),
+      id: widget.existingNote?.id ?? const Uuid().v4(),
       title: title,
       content: content,
       userId: RepositoryProvider.of<UserModel>(context).userId ?? '',
@@ -275,8 +324,37 @@ class _NoteseditscreenMobileState extends State<NoteseditscreenMobile>
       videoUrls: _videoUrls,
       linkedNoteIds: _linkedNoteIds,
     );
-    app<ZettelRepository>().createZettel(newNote);
-    Navigator.of(context).pop(newNote);
+    
+    try {
+      if (widget.existingNote != null) {
+        // Update existing note
+        await app<ZettelRepository>().updateZettel(newNote);
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Note updated successfully')),
+        );
+        
+      } else {
+        // Create new note
+        await app<ZettelRepository>().createZettel(newNote);
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Note created successfully')),
+        );
+      }
+      Navigator.of(context).pop(newNote);
+    } catch (e) {
+      setState(() {
+          _isLoading = false;
+        });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error saving note: ${e.toString()}')),
+      );
+    }
   }
 
   @override
@@ -586,11 +664,15 @@ class _NoteseditscreenMobileState extends State<NoteseditscreenMobile>
                         child: SizedBox(
                           width: double.infinity,
                           child: ElevatedButton.icon(
-                            icon: const Icon(
+                            icon: _isLoading? const Icon(Icons.upload_file) : const Icon(
                               Icons.save,
                               color: Colors.white,
                             ),
-                            label: const Text(
+                            label: _isLoading? const Center(
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            ) : const Text(
                               'Save Note',
                               style: TextStyle(color: Colors.white),
                             ),

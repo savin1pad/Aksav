@@ -1,8 +1,6 @@
 library home_view;
 
 import 'dart:developer';
-import 'dart:ui';
-
 import 'package:card_swiper/card_swiper.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
