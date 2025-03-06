@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_final_fields, unused_local_variable
+// ignore_for_file: prefer_final_fields, unused_local_variable, unused_element
 
 part of graphview_view;
 
@@ -44,12 +44,14 @@ class _GraphViewMobileState extends State<_GraphViewMobile>
 
   final customEdgeRenderer = SafeArrowEdgeRenderer();
   
-  builder = FruchtermanReingoldAlgorithm(
-    iterations: 300,         // Reduced iterations to prevent algorithm instability
-    repulsionRate: 0.8,      // Slightly lower than 1.0 to prevent oscillation
-    attractionRate: 0.05,    
-    repulsionPercentage: 0.6, 
-    renderer: customEdgeRenderer // Use our custom renderer
+  // Use our custom algorithm instead of the default
+  builder = SeparationAwareAlgorithm(
+    iterations: 300,
+    repulsionRate: 0.8,
+    attractionRate: 0.05,
+    repulsionPercentage: 0.6,
+    renderer: customEdgeRenderer,
+    minSeparationDistance: 70.0  // Make this larger for more visible separation
   );
   
   // Delay building the graph until the widget has been laid out
@@ -72,13 +74,12 @@ class _GraphViewMobileState extends State<_GraphViewMobile>
     }
   }
 
-  
-
   void _buildGraph() {
   _graph.nodes.clear();
   _graph.edges.clear();
 
   final nodeMap = <String, Node>{};
+  final linkedTargets = <String, List<Node>>{}; // Track nodes linked to same target
   final random = math.Random();
 
   // Safety check - if there are no notes, just return
@@ -99,10 +100,17 @@ class _GraphViewMobileState extends State<_GraphViewMobile>
     
     // Create nodes with a circular layout initially
     final int nodeCount = widget.notes.length;
-    final double radius = math.min(graphAreaWidth, graphAreaHeight) / 3;
+    
+    // Scale radius based on node count for better distribution
+    final double baseRadius = math.min(graphAreaWidth, graphAreaHeight) / 3;
+    final double radius = nodeCount > 50 
+        ? baseRadius * (1 + math.log(nodeCount / 50) / math.log(10))
+        : baseRadius;
+        
     final double centerX = graphAreaWidth / 2;
     final double centerY = graphAreaHeight / 2;
     
+    // First pass: create all nodes with initial positions
     for (int i = 0; i < widget.notes.length; i++) {
       final note = widget.notes[i];
       
@@ -126,7 +134,7 @@ class _GraphViewMobileState extends State<_GraphViewMobile>
       _graph.addNode(node);
     }
 
-    // Add edges
+    // Second pass: add edges and track linked nodes
     for (var note in widget.notes) {
       final sourceNode = nodeMap[note.id];
       if (sourceNode == null) continue;
@@ -134,6 +142,9 @@ class _GraphViewMobileState extends State<_GraphViewMobile>
       for (var linkedId in note.linkedNoteIds) {
         final targetNode = nodeMap[linkedId];
         if (targetNode != null) {
+          // Track nodes linking to the same target
+          linkedTargets.putIfAbsent(linkedId, () => []).add(sourceNode);
+          
           if (!_graph.edges.any((edge) =>
               (edge.source == sourceNode && edge.destination == targetNode) ||
               (edge.source == targetNode && edge.destination == sourceNode))) {
@@ -150,12 +161,27 @@ class _GraphViewMobileState extends State<_GraphViewMobile>
       }
     }
     
+    // Register linked nodes with our custom algorithm
+    if (builder is SeparationAwareAlgorithm) {
+      (builder as SeparationAwareAlgorithm).registerNodeData(linkedTargets, nodeMap);
+    }
+    
+    // Apply initial separation to prevent any initial overlap
+    _preventOverlappingNodes(linkedTargets, nodeMap, 70.0);
+    
     // Adjust dimensions for the algorithm
     builder.setDimensions(graphAreaWidth, graphAreaHeight);
     
     // Run the algorithm with gentle iterations
-    for (int i = 0; i < 3; i++) {
+    int iterations = nodeCount > 500 ? 1 : nodeCount > 100 ? 2 : 3;
+    for (int i = 0; i < iterations; i++) {
       builder.step(_graph);
+      
+      // Enforce separation after each step
+      if (builder is SeparationAwareAlgorithm) {
+        (builder as SeparationAwareAlgorithm).enforceNodeSeparation();
+      }
+      
       // Validate positions after each step
       _validateAllNodePositions(_graph, graphAreaWidth, graphAreaHeight);
     }
@@ -167,6 +193,63 @@ class _GraphViewMobileState extends State<_GraphViewMobile>
   }
   
   setState(() {});
+}
+
+
+// Add this method to prevent overlapping nodes
+void _preventOverlappingNodes(
+  Map<String, List<Node>> linkedTargets, 
+  Map<String, Node> nodeMap,
+  double minDistance
+) {
+  // For each target with multiple nodes linking to it
+  linkedTargets.forEach((targetId, sourceNodes) {
+    if (sourceNodes.length > 1) {
+      final targetNode = nodeMap[targetId];
+      if (targetNode == null) return;
+      
+      // Create a small "orbit" around the target for sources
+      final double orbitRadius = minDistance * 1.5;
+      
+      for (int i = 0; i < sourceNodes.length; i++) {
+        final sourceNode = sourceNodes[i];
+        // Position in a small circle around the target
+        final angle = (i / sourceNodes.length) * 2 * math.pi;
+        final offsetX = orbitRadius * math.cos(angle);
+        final offsetY = orbitRadius * math.sin(angle);
+        
+        // Update position to be slightly offset from target
+        sourceNode.position = Offset(
+          targetNode.x + offsetX,
+          targetNode.y + offsetY
+        );
+      }
+    }
+  });
+}
+
+// Add this method to adjust algorithm parameters for large node counts
+void _adjustAlgorithmForNodeCount(int nodeCount) {
+  if (nodeCount > 500) {
+    // For very large graphs
+    builder = FruchtermanReingoldAlgorithm(
+      iterations: 200,
+      repulsionRate: 1.2,
+      attractionRate: 0.03,
+      repulsionPercentage: 0.7,
+      renderer: builder.renderer
+    );
+  } else if (nodeCount > 100) {
+    // For large graphs
+    builder = FruchtermanReingoldAlgorithm(
+      iterations: 250,
+      repulsionRate: 1.0,
+      attractionRate: 0.04,
+      repulsionPercentage: 0.65,
+      renderer: builder.renderer
+    );
+  }
+  // Current parameters work well for smaller graphs
 }
 
 // Add this helper method to validate and fix all node positions
@@ -348,6 +431,7 @@ void _applyCircularLayout(Graph graph, Size screenSize) {
                         builder: (node) {
                           return node.key!.value;
                         },
+                        animated: true,
                       ),
                     ),
                   ),

@@ -23,6 +23,7 @@ import 'package:journey/widgets/constellation.dart';
 import 'package:journey/widgets/custom_page_route.dart';
 import 'package:journey/widgets/drawer.dart';
 import 'package:journey/widgets/nodewidget.dart';
+import 'package:journey/widgets/separationalgorithm.dart';
 import 'package:journey/widgets/space_background.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:uuid/uuid.dart';
