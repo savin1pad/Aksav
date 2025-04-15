@@ -41,7 +41,7 @@ dependencies:
   card_swiper: ^3.0.1
   swipe_cards: ^2.0.0+1
   swipeable_card_stack: ^0.0.5
-  google_sign_in: ^6.1.5
+  google_sign_in: ^6.3.0
   flutter_randomcolor: ^1.0.16
   uuid: ^3.0.6
   validators: ^3.0.0
